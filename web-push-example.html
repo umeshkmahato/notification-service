@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Push Example</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 32px; }
+      button { padding: 10px 16px; margin-top: 12px; }
+      pre { background: #f4f4f4; padding: 12px; border-radius: 8px; }
+    </style>
+  </head>
+  <body>
+    <h1>Web Push Demo</h1>
+    <button id="registerBtn">Register this browser for push notifications</button>
+    <pre id="status">Waiting...</pre>
+
+    <script>
+      const statusEl = document.getElementById('status');
+      const registerBtn = document.getElementById('registerBtn');
+
+      async function registerPush() {
+        if (!('serviceWorker' in navigator)) {
+          statusEl.textContent = 'Service workers are not supported in this browser.';
+          return;
+        }
+
+        if (!('PushManager' in window)) {
+          statusEl.textContent = 'Web Push is not supported in this browser.';
+          return;
+        }
+
+        try {
+          const permission = await Notification.requestPermission();
+          if (permission !== 'granted') {
+            statusEl.textContent = 'Notification permission denied.';
+            return;
+          }
+
+          const registration = await navigator.serviceWorker.register('/service-worker.js');
+          const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array('YOUR_VAPID_PUBLIC_KEY')
+          });
+
+          const response = await fetch('http://localhost:5002/api/push/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: 'web-user-demo',
+              deviceToken: JSON.stringify(subscription),
+              platform: 'web'
+            })
+          });
+
+          const result = await response.json();
+          statusEl.textContent = JSON.stringify(result, null, 2);
+        } catch (error) {
+          statusEl.textContent = 'Error: ' + error.message;
+        }
+      }
+
+      function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = atob(base64);
+        const output = new Uint8Array(rawData.length);
+
+        for (let i = 0; i < rawData.length; ++i) {
+          output[i] = rawData.charCodeAt(i);
+        }
+
+        return output;
+      }
+
+      registerBtn.addEventListener('click', registerPush);
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,45 @@
+{
+  "name": "notification-service",
+  "version": "1.0.0",
+  "description": "A scalable, multi-channel notification service with rate limiting and monitoring",
+  "main": "src/server.js",
+  "type": "module",
+  "packageManager": "yarn@1.22.22",
+  "scripts": {
+    "start": "node src/server.js",
+    "worker": "node src/rabbitmq/worker.js",
+    "rmq-worker": "node src/rabbitmq/worker.js",
+    "test:notification": "node src/testNotificationService.js",
+    "test:ratelimit": "node src/testRateLimiting.js",
+    "test:rmq": "node src/testRabbitMQNotification.js",
+    "test:push": "node src/testPushService.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": [
+    "notifications",
+    "email",
+    "sms",
+    "push",
+    "in-app",
+    "rate-limiting",
+    "rabbitmq"
+  ],
+  "author": "Umesh Kumar Mahato",
+  "license": "MIT",
+  "dependencies": {
+    "amqplib": "^2.2.0",
+    "axios": "^1.20.0",
+    "dotenv": "^18.0.9",
+    "express": "^4.22.3",
+    "ioredis": "^6.0.0",
+    "node-pushnotifications": "^6.0.0",
+    "nodemailer": "^10.2.1",
+    "redis": "^6.3.0",
+    "socket.io": "^4.8.4",
+    "twilio": "^6.2.0",
+    "uuid": "^14.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
